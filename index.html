@@ -1,0 +1,1907 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kva art — галерея картин и ручной работы</title>
+<style>
+  :root{
+    --bg:#0a0805; --bg2:#151009; --card:#1b140b;
+    --orange:#f97316; --amber:#fbbf24; --deep:#c2410c;
+    --text:#f5efe8; --muted:#b8a898; --green:#4ade80;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+  body::before{
+    content:"";position:fixed;inset:0;z-index:-2;
+    background:
+      radial-gradient(1px 1px at 20% 30%, #ffd9b0 50%, transparent 51%),
+      radial-gradient(1px 1px at 40% 70%, #fff 50%, transparent 51%),
+      radial-gradient(2px 2px at 60% 20%, #ffc48a 50%, transparent 51%),
+      radial-gradient(1px 1px at 80% 40%, #fff 50%, transparent 51%),
+      radial-gradient(1px 1px at 10% 80%, #ffe9d0 50%, transparent 51%),
+      radial-gradient(2px 2px at 90% 85%, #fff 50%, transparent 51%),
+      radial-gradient(1px 1px at 35% 10%, #fff 50%, transparent 51%),
+      radial-gradient(1px 1px at 70% 60%, #ffd9b0 50%, transparent 51%),
+      radial-gradient(1px 1px at 50% 90%, #fff 50%, transparent 51%),
+      linear-gradient(180deg,#0a0805 0%,#140d06 50%,#0a0805 100%);
+  }
+  header{
+    position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
+    padding:14px 4vw;background:rgba(10,8,5,.85);backdrop-filter:blur(14px);
+    border-bottom:1px solid rgba(249,115,22,.3);flex-wrap:wrap;gap:8px;
+  }
+  .logo{
+    font-size:1.6rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+    background:linear-gradient(90deg,var(--amber),var(--orange),var(--deep));
+    -webkit-background-clip:text;background-clip:text;color:transparent;cursor:pointer;
+  }
+  nav a{color:var(--muted);text-decoration:none;margin-left:15px;font-size:.86rem;transition:color .25s}
+  nav a:hover,nav a.active{color:var(--amber)}
+  .user-link{color:var(--amber);text-decoration:none;margin-left:15px;font-size:.86rem;cursor:pointer;border:none;background:none;font-family:inherit;display:inline-flex;align-items:center;gap:6px}
+  .user-link img{width:24px;height:24px;border-radius:50%;object-fit:cover;border:1px solid var(--orange)}
+  @media(max-width:820px){nav a{margin-left:9px;font-size:.72rem}}
+
+  .page{display:none;animation:fade .5s ease}
+  .page.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+  .hero{min-height:72vh;display:flex;flex-direction:column;justify-content:center;padding:60px 5vw}
+  .hero h1{font-size:clamp(2.4rem,6vw,4.4rem);line-height:1.08;font-weight:900;max-width:820px}
+  .hero h1 span{background:linear-gradient(90deg,var(--amber),var(--orange),var(--deep));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{color:var(--muted);max-width:600px;margin:24px 0 36px;font-size:1.1rem;line-height:1.7}
+  .btn{
+    display:inline-block;padding:14px 34px;border-radius:999px;border:none;cursor:pointer;
+    font-size:1rem;font-weight:700;text-decoration:none;font-family:inherit;
+    background:linear-gradient(90deg,var(--orange),var(--amber));color:#1a0e02;
+    box-shadow:0 0 30px rgba(249,115,22,.4);transition:transform .2s,box-shadow .2s;
+  }
+  .btn:hover{transform:translateY(-3px);box-shadow:0 6px 40px rgba(251,191,36,.5)}
+  .btn.ghost{background:transparent;border:1px solid var(--orange);color:var(--amber);box-shadow:none;margin-left:14px}
+  .btn.small{padding:8px 18px;font-size:.85rem}
+  .stats{display:flex;gap:40px;padding:0 5vw 50px;flex-wrap:wrap}
+  .stats div b{font-size:1.8rem;color:var(--amber)}
+  .stats div span{display:block;color:var(--muted);font-size:.9rem;margin-top:4px}
+  .home-note{
+    margin:0 5vw 70px;max-width:760px;background:rgba(249,115,22,.08);
+    border:1px dashed var(--orange);border-radius:16px;padding:22px 26px;color:var(--muted);line-height:1.7;
+  }
+  .home-note b{color:var(--amber)}
+
+  .section{padding:60px 5vw}
+  .section h2{font-size:2rem;margin-bottom:8px}
+  .section .sub{color:var(--muted);margin-bottom:30px}
+
+  /* Папки галереи */
+  .folders{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:30px}
+  .folder{
+    padding:10px 22px;border-radius:999px;border:1px solid rgba(249,115,22,.4);cursor:pointer;
+    background:transparent;color:var(--muted);font-family:inherit;font-weight:700;font-size:.92rem;
+    transition:all .2s;
+  }
+  .folder.on{background:linear-gradient(90deg,var(--orange),var(--amber));color:#1a0e02;border-color:transparent}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:26px}
+  .card{
+    background:var(--card);border-radius:16px;overflow:hidden;cursor:pointer;position:relative;
+    border:1px solid rgba(249,115,22,.25);transition:transform .25s,box-shadow .25s,border-color .25s;
+  }
+  .card:hover{transform:translateY(-6px);border-color:var(--amber);box-shadow:0 14px 40px rgba(249,115,22,.3)}
+  .card img{width:100%;height:280px;object-fit:cover;display:block}
+  .ph{
+    height:280px;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,#2a1a08,#1b1206 50%,#33200a);color:var(--muted);font-size:.9rem;
+  }
+  .ph span:first-child{font-size:3rem}
+  .card .info{padding:16px 18px}
+  .card .info h3{font-size:1.05rem;margin-bottom:4px}
+  .card .info small{color:var(--muted)}
+  .card .row{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+  .price{color:var(--amber);font-weight:800;font-size:1.15rem}
+  .buy{
+    padding:8px 18px;border-radius:999px;border:none;cursor:pointer;font-weight:700;
+    background:linear-gradient(90deg,var(--orange),var(--amber));color:#1a0e02;font-size:.85rem;transition:opacity .2s;
+  }
+  .buy:hover{opacity:.85}
+  .badge-sold{
+    position:absolute;top:12px;right:12px;background:linear-gradient(90deg,var(--orange),var(--amber));
+    color:#1a0e02;font-weight:800;font-size:.75rem;padding:5px 12px;border-radius:999px;letter-spacing:1px;z-index:2;
+  }
+  .badge-craft{
+    position:absolute;top:12px;left:12px;background:#241a10;border:1px solid var(--amber);
+    color:var(--amber);font-weight:700;font-size:.72rem;padding:5px 12px;border-radius:999px;z-index:2;
+  }
+  .empty{color:var(--muted);font-size:1.1rem;padding:40px 0}
+
+  .painting-wrap{display:grid;grid-template-columns:1.1fr 1fr;gap:48px;align-items:start;max-width:1100px;margin:0 auto}
+  @media(max-width:860px){.painting-wrap{grid-template-columns:1fr}}
+  .painting-wrap img{width:100%;border-radius:18px;border:1px solid rgba(255,255,255,.12);box-shadow:0 0 60px rgba(249,115,22,.3)}
+  .pd-ph{
+    min-height:420px;border-radius:18px;display:flex;flex-direction:column;gap:10px;
+    align-items:center;justify-content:center;background:linear-gradient(135deg,#2a1a08,#1b1206 50%,#33200a);
+    color:var(--muted);border:1px dashed rgba(249,115,22,.5);font-size:1.1rem;
+  }
+  .pd-ph span:first-child{font-size:4rem}
+  .back{color:var(--muted);text-decoration:none;font-size:.95rem;display:inline-block;margin-bottom:22px}
+  .back:hover{color:#fff}
+  .pd h2{font-size:2rem;margin-bottom:6px}
+  .pd .tag{color:var(--amber);font-size:.85rem;text-transform:uppercase;letter-spacing:2px}
+  .pd p{color:var(--muted);line-height:1.75;margin:18px 0}
+  .pd .price{font-size:2rem;margin:14px 0 26px}
+  .meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px 0;color:var(--muted);font-size:.92rem}
+  .meta b{color:var(--text)}
+  .sold-note{
+    background:rgba(249,115,22,.12);border:1px solid var(--orange);border-radius:12px;
+    padding:14px 18px;color:var(--amber);font-weight:700;margin-top:14px;
+  }
+  input.f,textarea.f,select.f{
+    background:var(--bg2);border:1px solid rgba(249,115,22,.4);border-radius:10px;
+    padding:12px 14px;color:var(--text);font-size:.95rem;resize:vertical;font-family:inherit;width:100%;
+  }
+  input.f:focus,textarea.f:focus,select.f:focus{outline:none;border-color:var(--amber)}
+  form.order{display:grid;gap:12px;max-width:420px;margin-top:14px}
+
+  /* ЧАТЫ */
+  .chat-box{
+    max-width:420px;background:var(--bg2);border:1px solid rgba(249,115,22,.4);
+    border-radius:14px;padding:16px;margin-top:18px;
+  }
+  .chat-box h4{margin-bottom:10px;color:var(--amber)}
+  .chat-msgs{display:grid;gap:8px;max-height:260px;overflow-y:auto;margin-bottom:12px}
+  .msg{padding:9px 12px;border-radius:12px;font-size:.9rem;line-height:1.5;max-width:85%;word-break:break-word}
+  .msg.me{background:linear-gradient(90deg,rgba(249,115,22,.3),rgba(251,191,36,.22));justify-self:end;border-bottom-right-radius:4px}
+  .msg.admin{background:#241a10;border:1px solid rgba(251,191,36,.3);justify-self:start;border-bottom-left-radius:4px}
+  .msg small{display:block;color:var(--muted);font-size:.7rem;margin-top:4px}
+  .chat-row{display:flex;gap:8px}
+  .chat-row input{flex:1}
+  .auth-hint{padding:14px;text-align:center;color:var(--muted);font-size:.9rem}
+  .auth-hint a{color:var(--amber);cursor:pointer;text-decoration:underline}
+
+  /* АУКЦИОН */
+  .auc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:26px}
+  .auc-card{background:var(--card);border:1px solid rgba(249,115,22,.3);border-radius:16px;overflow:hidden}
+  .auc-card img{width:100%;height:220px;object-fit:cover;display:block}
+  .auc-body{padding:18px}
+  .auc-body h3{margin-bottom:4px}
+  .auc-bid{font-size:1.6rem;color:var(--amber);font-weight:900;margin:10px 0 2px}
+  .auc-lead{font-size:.85rem;color:var(--muted);margin-bottom:12px}
+  .auc-lead b{color:var(--amber)}
+  .auc-cd{font-size:.85rem;color:var(--green);margin-bottom:8px;font-weight:700}
+  .auc-history{
+    background:var(--bg2);border-radius:10px;padding:10px 12px;margin:12px 0;
+    max-height:150px;overflow-y:auto;font-size:.85rem;color:var(--muted);display:grid;gap:6px;
+  }
+  .auc-history div{display:flex;justify-content:space-between;gap:10px}
+  .auc-history b{color:var(--text)}
+  .auc-form{display:grid;gap:8px;margin-top:8px}
+  .auc-banner{border-radius:12px;padding:14px 16px;font-size:.92rem;line-height:1.6;margin-bottom:12px}
+  .auc-banner.win{background:rgba(74,222,128,.12);border:1px solid var(--green);color:var(--green)}
+  .auc-banner.end{background:var(--bg2);border:1px solid rgba(249,115,22,.4);color:var(--muted)}
+
+  /* ОПРОСЫ */
+  .poll-card{background:var(--card);border:1px solid rgba(249,115,22,.3);border-radius:16px;padding:22px;max-width:640px}
+  .poll-opt{margin:14px 0}
+  .poll-opt .po-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .poll-opt .po-row b{flex:1}
+  .poll-bar{height:10px;background:var(--bg2);border-radius:99px;overflow:hidden}
+  .poll-bar div{height:100%;background:linear-gradient(90deg,var(--orange),var(--amber));border-radius:99px}
+
+  /* ОТЗЫВЫ — КИТЫ */
+  .rev-form{background:var(--card);border:1px solid rgba(249,115,22,.3);border-radius:16px;padding:22px;max-width:560px;margin-bottom:36px}
+  .frogs-in{display:flex;gap:8px;font-size:2rem;cursor:pointer;margin:6px 0 12px}
+  .frogs-in span{color:#4a3a28;transition:all .15s}
+  .frogs-in span.on{color:var(--amber);transform:scale(1.1)}
+  .rev-item{background:var(--card);border:1px solid rgba(249,115,22,.25);border-radius:14px;padding:18px 20px;margin-bottom:16px;max-width:640px}
+  .rev-item .r-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:8px}
+  .rev-item .r-frogs{letter-spacing:2px}
+  .rev-item p{color:var(--muted);line-height:1.7}
+  .rev-item small{color:var(--muted)}
+  .avg-box{display:flex;align-items:center;gap:14px;margin-bottom:26px}
+  .avg-box b{font-size:2.6rem;color:var(--amber)}
+
+  /* ПРОФИЛЬ */
+  .profile-card{background:var(--card);border:1px solid rgba(249,115,22,.3);border-radius:18px;padding:30px;max-width:520px}
+  .avatar{
+    width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid var(--orange);
+    box-shadow:0 0 30px rgba(249,115,22,.4);display:block;margin-bottom:16px;background:#241a10;
+    display:flex;align-items:center;justify-content:center;font-size:3rem;
+  }
+  .p-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(249,115,22,.15);color:var(--muted);gap:10px;flex-wrap:wrap}
+  .p-row b{color:var(--text)}
+
+  .about{max-width:760px;color:var(--muted);line-height:1.8}
+  .about b{color:var(--text)}
+  footer{
+    border-top:1px solid rgba(249,115,22,.3);padding:34px 5vw;color:var(--muted);
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;font-size:.9rem;align-items:center;
+  }
+  footer .logo{font-size:1.1rem}
+  footer a{color:var(--muted);text-decoration:none;margin-left:18px}
+  footer a:hover{color:var(--amber)}
+
+  .toast{
+    position:fixed;bottom:24px;right:24px;background:var(--card);z-index:130;
+    border:1px solid var(--orange);border-radius:12px;padding:16px 22px;
+    display:none;box-shadow:0 10px 40px rgba(0,0,0,.5);max-width:340px;line-height:1.5;
+  }
+  .toast.show{display:block;animation:fade .3s ease}
+
+  .modal{position:fixed;inset:0;background:rgba(5,3,1,.8);backdrop-filter:blur(6px);display:none;z-index:110;align-items:center;justify-content:center;padding:20px}
+  .modal.open{display:flex}
+  .modal-box{background:var(--card);border:1px solid var(--orange);border-radius:18px;padding:28px;width:100%;max-width:420px;animation:fade .3s ease}
+  .modal-box h3{margin-bottom:16px}
+  .modal-box form{display:grid;gap:10px}
+  .modal-tabs{display:flex;gap:8px;margin-bottom:16px}
+  .modal-tabs button{flex:1;padding:10px;border-radius:10px;border:1px solid rgba(249,115,22,.4);background:transparent;color:var(--muted);cursor:pointer;font-family:inherit;font-weight:700}
+  .modal-tabs button.on{background:linear-gradient(90deg,var(--orange),var(--amber));color:#1a0e02}
+  .modal-close{margin-top:14px;width:100%;padding:10px;border-radius:10px;border:1px solid var(--orange);background:transparent;color:var(--amber);cursor:pointer;font-family:inherit}
+
+  /* АДМИН-ПАНЕЛЬ */
+  .overlay{position:fixed;inset:0;background:rgba(5,3,1,.88);backdrop-filter:blur(6px);display:none;z-index:100;overflow-y:auto;padding:30px 5vw}
+  .overlay.open{display:block}
+  .admin-box{max-width:880px;margin:0 auto;background:var(--card);border:1px solid var(--orange);border-radius:18px;padding:26px}
+  .admin-box h2{margin-bottom:4px}
+  .admin-box .sub{margin-bottom:16px;font-size:.9rem}
+  .admin-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin:16px 0}
+  .stat-card{background:var(--bg2);border:1px solid rgba(249,115,22,.3);border-radius:12px;padding:14px;text-align:center}
+  .stat-card b{display:block;font-size:1.5rem;color:var(--amber);margin-bottom:4px}
+  .stat-card span{font-size:.76rem;color:var(--muted)}
+  .admin-tabs{position:sticky;top:-30px;z-index:5;display:flex;gap:6px;flex-wrap:wrap;background:var(--card);padding:12px 0;margin-bottom:18px;border-bottom:1px solid rgba(249,115,22,.3)}
+  .admin-tabs button{padding:8px 14px;border-radius:999px;border:1px solid rgba(249,115,22,.4);background:transparent;color:var(--muted);cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:700}
+  .admin-tabs button.on{background:linear-gradient(90deg,var(--orange),var(--amber));color:#1a0e02;border-color:transparent}
+  .atab{display:none}
+  .atab.on{display:block;animation:fade .3s ease}
+  .admin-list{display:grid;gap:10px;margin:14px 0}
+  .admin-item{display:flex;align-items:center;gap:14px;background:var(--bg2);border:1px solid rgba(249,115,22,.3);border-radius:12px;padding:10px 14px}
+  .admin-item img{width:52px;height:52px;object-fit:cover;border-radius:8px}
+  .admin-item .ph-mini{width:52px;height:52px;border-radius:8px;background:#2a1a08;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+  .admin-item .nm{flex:1}
+  .admin-item .nm small{color:var(--muted);display:block}
+  .del{background:transparent;border:1px solid #f43f5e;color:#f43f5e;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.85rem}
+  .del:hover{background:#f43f5e;color:#fff}
+  .ok-btn{background:transparent;border:1px solid var(--green);color:var(--green);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.85rem}
+  .ok-btn:hover{background:var(--green);color:#052e12}
+  .admin-form{display:grid;gap:10px;margin-top:10px}
+  .admin-form label{font-size:.85rem;color:var(--muted)}
+  .close-admin{background:transparent;border:1px solid var(--orange);color:var(--amber);border-radius:8px;padding:8px 16px;cursor:pointer;margin-top:16px}
+  .hint{font-size:.8rem;color:var(--muted);margin-top:8px;line-height:1.6}
+  .check-row{display:flex;flex-wrap:wrap;gap:8px}
+  .check-row label{display:flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid rgba(249,115,22,.3);border-radius:10px;padding:8px 12px;font-size:.85rem;cursor:pointer;color:var(--text)}
+  .order-card{background:var(--bg2);border:1px solid rgba(249,115,22,.3);border-radius:12px;padding:14px 16px}
+  .order-card .oc-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:.9rem;margin-bottom:10px}
+  .order-card .oc-head b{color:var(--amber)}
+  .order-card .oc-head small{color:var(--muted)}
+  .order-card .chat-msgs{max-height:200px}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="frogG" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fbbf24"/>
+      <stop offset="1" stop-color="#f97316"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<header>
+  <div class="logo" data-page="home">✦ Kva art</div>
+  <nav>
+    <a href="#" data-page="home" class="active">Главная</a>
+    <a href="#" data-page="gallery">Галерея</a>
+    <a href="#" data-page="expo">Выставка</a>
+    <a href="#" data-page="polls">Опросы</a>
+    <a href="#" data-page="reviews">Отзывы</a>
+    <a href="#" data-page="about">О нас</a>
+    <a href="#" data-page="contact">Контакты</a>
+    <span class="user-link" id="user-link">👤 Профиль</span>
+  </nav>
+</header>
+
+<section class="page active" id="home">
+  <div class="hero">
+    <h1>Картины, которые <span>хочется рассматривать</span></h1>
+    <p>Kva art — галерея живописи и работ ручной работы. Пейзажи, абстракции, портреты и космос — любые направления. Каждая работа выставляется только по фотографии оригинала. А ещё у нас живые аукционы каждые 48 часов!</p>
+    <div>
+      <a class="btn" href="#" data-page="gallery">Смотреть галерею</a>
+      <a class="btn ghost" href="#" data-page="expo">Выставка ручной работы</a>
+    </div>
+  </div>
+  <div class="stats">
+    <div><b id="cnt">0</b><span>картин в продаже</span></div>
+    <div><b id="auc-cnt">0</b><span>активных аукционов</span></div>
+    <div><b>100%</b><span>оригиналы, только фото</span></div>
+    <div><b>РФ</b><span>доставка по всей стране</span></div>
+  </div>
+  <div class="home-note">
+    🎨 <b>Хотите выставить свою работу?</b> Мы размещаем работы наших гостей на вкладке «Выставка» за определённую плату — <b>цена договорная</b>. Напишите администратору в личном чате (вкладка «Контакты») или на почту — обсудим условия размещения.
+  </div>
+</section>
+
+<!-- ГАЛЕРЕЯ С ПАПКАМИ -->
+<section class="page" id="gallery">
+  <div class="section">
+    <h2>Галерея</h2>
+    <div class="folders">
+      <button class="folder on" data-fold="sale">🖼 В продаже</button>
+      <button class="folder" data-fold="sold">🏷 Купленные</button>
+      <button class="folder" data-fold="auction">🔨 Аукцион</button>
+    </div>
+
+    <div class="fold" id="fold-sale">
+      <p class="sub">Нажмите на карточку, чтобы открыть картину и купить её отдельно.</p>
+      <div class="grid" id="grid"></div>
+      <p class="empty" id="empty" style="display:none">Пока нет ни одной картины. Добавьте первую через панель управления (ссылка внизу страницы).</p>
+    </div>
+
+    <div class="fold" id="fold-sold" style="display:none">
+      <p class="sub">Работы, которые уже нашли своих владельцев.</p>
+      <div class="grid" id="sold-grid"></div>
+      <p class="empty" id="sold-empty" style="display:none">Пока ни одна картина не куплена.</p>
+    </div>
+
+    <div class="fold" id="fold-auction" style="display:none">
+      <p class="sub">Аукцион проводится каждые 48 часов. Перебивайте ставки других участников — минимальный шаг 100 ₽, на перебивание даётся 12 часов. Аукцион открывает только администратор.</p>
+      <div class="auc-grid" id="auc-grid"></div>
+      <p class="empty" id="auc-empty" style="display:none">Сейчас нет активных аукционов. Аукцион каждые 48 часов — загляните позже!</p>
+    </div>
+
+    <div class="home-note" style="margin:30px 0 0">
+      🖐 <b>Хотите выставить свою работу?</b> Размещаем работы гостей за договорную плату — напишите администратору в личном чате на вкладке «Контакты» или на почту.
+    </div>
+  </div>
+</section>
+
+<!-- ВЫСТАВКА РУЧНОЙ РАБОТЫ -->
+<section class="page" id="expo">
+  <div class="section">
+    <h2>🎨 Выставка ручной работы</h2>
+    <p class="sub">Уникальные предметы, сделанные вручную: декор, подарки, сувениры и многое другое. Нажмите на карточку, чтобы подробнее.</p>
+    <div class="grid" id="expo-grid"></div>
+    <p class="empty" id="expo-empty" style="display:none">Выставка пока пуста.</p>
+    <div class="home-note" style="margin:30px 0 0">
+      🖐 <b>Хотите выставить свою работу?</b> Размещаем работы гостей за договорную плату — напишите администратору в личном чате на вкладке «Контакты» или на почту.
+    </div>
+  </div>
+</section>
+
+<section class="page" id="polls">
+  <div class="section">
+    <h2>🗳 Опросы</h2>
+    <p class="sub">Голосуйте, какую картину выставить на следующий аукцион. Аукцион каждые 48 часов!</p>
+    <div id="polls-wrap"></div>
+  </div>
+</section>
+
+<section class="page" id="reviews">
+  <div class="section">
+    <h2><span style="font-size:24px;vertical-align:-3px;filter:hue-rotate(-95deg) saturate(1.5) brightness(1.08) drop-shadow(0 0 6px rgba(251,191,36,.5))">🐸</span> Отзывы покупателей</h2>
+    <p class="sub">Оцените покупку по шкале от 1 до 5 лягушек и оставьте комментарий. Отзывы публикуются после проверки администратором.</p>
+    <div class="avg-box"><b id="rev-avg">—</b><span style="color:var(--muted)" id="rev-avg-sub">пока нет отзывов</span></div>
+    <form class="rev-form" id="rev-form">
+      <input class="f" id="rv-name" placeholder="Ваше имя *" required>
+      <div class="frogs-in" id="rv-frogs"></div>
+      <textarea class="f" id="rv-text" rows="3" placeholder="Ваш отзыв *" required></textarea>
+      <button class="btn" type="submit">Оставить отзыв</button>
+    </form>
+    <div id="rev-list"></div>
+  </div>
+</section>
+
+<!-- СТРАНИЦА КАРТИНЫ -->
+<section class="page" id="painting">
+  <div class="section">
+    <div class="painting-wrap">
+      <div>
+        <a class="back" href="#" data-page="gallery">← Назад в галерею</a>
+        <div id="pd-img-wrap"></div>
+      </div>
+      <div class="pd">
+        <span class="tag" id="pd-tag"></span>
+        <h2 id="pd-name"></h2>
+        <div class="price" id="pd-price"></div>
+        <p id="pd-desc"></p>
+        <div class="meta">
+          <span>Материалы: <b id="pd-mat"></b></span>
+          <span>Размер: <b id="pd-size"></b></span>
+        </div>
+        <p style="font-size:.85rem">✔ Единственный экземпляр &nbsp; ✔ Надёжная упаковка</p>
+        <div id="pd-sold-note"></div>
+        <div id="pd-buy-zone">
+          <h3 style="margin:22px 0 4px">Купить эту картину</h3>
+          <p style="font-size:.9rem">Оставьте заявку — мы свяжемся для подтверждения и оплаты. Заявку и переписку вы увидите ниже, а художник — в панели управления.</p>
+          <form class="order" id="order-form">
+            <input class="f" type="text" id="of-name" placeholder="Ваше имя" required>
+            <input class="f" type="tel" id="of-contact" placeholder="Телефон или e-mail" required>
+            <textarea class="f" rows="3" id="of-comment" placeholder="Комментарий (необязательно)"></textarea>
+            <button class="btn" type="submit">Оформить заказ</button>
+          </form>
+          <div id="buyer-chat"></div>
+          <h3 style="margin:22px 0 4px">💬 Написать автору</h3>
+          <div id="pd-personal-chat"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- СТРАНИЦА РАБОТЫ ВЫСТАВКИ -->
+<section class="page" id="craft">
+  <div class="section">
+    <div class="painting-wrap">
+      <div>
+        <a class="back" href="#" data-page="expo">← Назад на выставку</a>
+        <div id="cd-img-wrap"></div>
+      </div>
+      <div class="pd">
+        <span class="tag" id="cd-tag"></span>
+        <h2 id="cd-name"></h2>
+        <div class="price" id="cd-price"></div>
+        <p id="cd-desc"></p>
+        <div class="meta">
+          <span>Материалы: <b id="cd-mat"></b></span>
+          <span>Размер: <b id="cd-size"></b></span>
+        </div>
+        <div id="cd-sold-note"></div>
+        <div id="cd-buy-zone">
+          <h3 style="margin:22px 0 4px">Купить эту работу</h3>
+          <form class="order" id="craft-order-form">
+            <input class="f" type="text" id="cf-name" placeholder="Ваше имя" required>
+            <input class="f" type="tel" id="cf-contact" placeholder="Телефон или e-mail" required>
+            <textarea class="f" rows="3" id="cf-comment" placeholder="Комментарий (необязательно)"></textarea>
+            <button class="btn" type="submit">Оформить заказ</button>
+          </form>
+          <div id="craft-buyer-chat"></div>
+          <h3 style="margin:22px 0 4px">💬 Написать автору</h3>
+          <div id="cd-personal-chat"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ПРОФИЛЬ -->
+<section class="page" id="profile">
+  <div class="section">
+    <h2>👤 Профиль</h2>
+    <p class="sub">Ваш личный аккаунт на Kva art.</p>
+    <div class="profile-card" id="profile-card"></div>
+  </div>
+</section>
+
+<section class="page" id="about">
+  <div class="section">
+    <h2>О Kva art</h2>
+    <div class="about">
+      <p><b>Kva art</b> — авторская галерея живописи и выставка работ ручной работы. Мы пишем в любых направлениях: пейзаж, абстракция, портрет, натюрморт, фэнтези, космос и многое другое.</p>
+      <p style="margin-top:14px">Главный принцип галереи: <b>работы выставляются только по фото оригинала</b>. Никаких рендеров и обработанных изображений — на фото именно та работа, которая приедет к вам.</p>
+      <p style="margin-top:14px">Каждая картина продаётся отдельно, в единственном экземпляре. А на аукционе можно купить работу, перебивая ставки других участников.</p>
+      <p style="margin-top:14px">Хотите выставить свою работу на нашей выставке? Цена договорная — напишите администратору. Хотите картину на заказ? Обсудим сюжет, размер и сроки.</p>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="contact">
+  <div class="section">
+    <h2>Контакты</h2>
+    <p class="sub">Готовы ответить на любые вопросы о картинах, заказе и доставке.</p>
+    <div class="about">
+      <p>📧 <b>web21veka.mult@gmail.com</b></p>
+      <p style="margin-top:8px">📧 <b>viktorykon2111@gmail.com</b></p>
+      <p style="margin-top:14px">📱 <b>+7 995 221-58-01</b> — Telegram / Max</p>
+      <p style="margin-top:8px">📱 <b>+7 960 472-93-02</b> — Telegram / Max</p>
+      <p style="margin-top:14px">🕐 Работаем <b>круглосуточно</b> — пишите в любое время!</p>
+    </div>
+    <h3 style="margin:28px 0 4px">💬 Личный чат с художником</h3>
+    <p style="color:var(--muted);font-size:.92rem">Задайте вопрос напрямую — художник ответит здесь же.</p>
+    <div id="contact-personal-chat"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="logo" data-page="home">✦ Kva art</div>
+  <div>
+    Картины в единственном экземпляре · только оригиналы по фото · © 2026
+    <a href="#" id="admin-link">⚙ Управление</a>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<!-- ОКНО ВХОДА / РЕГИСТРАЦИИ -->
+<div class="modal" id="auth-modal">
+  <div class="modal-box">
+    <h3>👤 Вход на сайт</h3>
+    <div class="modal-tabs">
+      <button id="tab-login" class="on">Вход</button>
+      <button id="tab-reg">Регистрация</button>
+    </div>
+    <form id="form-login">
+      <input class="f" id="li-phone" type="tel" placeholder="Номер телефона *" required>
+      <input class="f" id="li-pass" type="password" placeholder="Пароль *" required>
+      <button class="btn" type="submit">Войти</button>
+    </form>
+    <form id="form-reg" style="display:none">
+      <input class="f" id="rg-name" placeholder="Ваше имя *" required>
+      <input class="f" id="rg-phone" type="tel" placeholder="Номер телефона *" required>
+      <input class="f" id="rg-pass" type="password" placeholder="Пароль (мин. 4 символа) *" required>
+      <button class="btn" type="submit">Зарегистрироваться</button>
+    </form>
+    <p class="hint">Регистрация нужна для покупки, ставок на аукционе, отзывов, опросов и общения с художником. Смотреть сайт можно без входа.</p>
+    <button class="modal-close" id="auth-close">Закрыть</button>
+  </div>
+</div>
+
+<!-- АДМИН-ПАНЕЛЬ -->
+<div class="overlay" id="admin">
+  <div class="admin-box">
+    <h2>Панель управления</h2>
+    <p class="sub">Заявки, чаты, аукционы, опросы, отзывы и галерея.</p>
+
+    <div class="admin-stats">
+      <div class="stat-card"><b id="st-visits">0</b><span>всего посещений сайта</span></div>
+      <div class="stat-card"><b id="st-today">0</b><span>посещений сегодня</span></div>
+      <div class="stat-card"><b id="st-paintings">0</b><span>работ в галерее</span></div>
+      <div class="stat-card"><b id="st-orders">0</b><span>заявок на покупку</span></div>
+    </div>
+
+    <div class="admin-tabs">
+      <button data-atab="orders" class="on">🛒 Заявки</button>
+      <button data-atab="chats">💬 Личные чаты</button>
+      <button data-atab="reviews"><span style="font-size:24px;vertical-align:-3px;filter:hue-rotate(-95deg) saturate(1.5) brightness(1.08) drop-shadow(0 0 6px rgba(251,191,36,.5))">🐸</span> Отзывы</button>
+      <button data-atab="auction">🔨 Аукционы</button>
+      <button data-atab="polls">🗳 Опросы</button>
+      <button data-atab="gallery">🖼 Работы</button>
+      <button data-atab="save">💾 Сохранение</button>
+    </div>
+
+    <div class="atab on" id="atab-orders">
+      <div class="admin-list" id="orders-list"></div>
+    </div>
+
+    <div class="atab" id="atab-chats">
+      <div class="admin-list" id="admin-chats"></div>
+    </div>
+
+    <div class="atab" id="atab-reviews">
+      <div class="admin-list" id="admin-reviews"></div>
+    </div>
+
+    <div class="atab" id="atab-auction">
+      <div class="admin-list" id="admin-auc-list"></div>
+      <form class="admin-form" id="auc-form">
+        <label>Открыть аукцион на картину</label>
+        <select class="f" id="af-auc-painting"></select>
+        <input class="f" id="af-auc-start" type="text" inputmode="numeric" placeholder="Стартовая цена, ₽ *">
+        <button class="btn" type="submit">Запустить аукцион</button>
+      </form>
+    </div>
+
+    <div class="atab" id="atab-polls">
+      <div class="admin-list" id="admin-polls"></div>
+      <form class="admin-form" id="poll-form">
+        <label>Новый опрос: отметьте картины — участники выберут, что выставить на аукцион</label>
+        <div class="check-row" id="poll-checks"></div>
+        <button class="btn" type="submit">Создать опрос</button>
+      </form>
+    </div>
+
+    <div class="atab" id="atab-gallery">
+      <div class="admin-list" id="admin-list"></div>
+      <form class="admin-form" id="admin-form">
+        <input class="f" id="af-name" placeholder="Название работы *" required>
+        <input class="f" id="af-tag" placeholder="Техника / жанр (например: Масло · пейзаж)">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <input class="f" id="af-size" placeholder="Размер (например: 50×70 см)">
+          <input class="f" id="af-price" type="text" inputmode="numeric" placeholder="Цена, ₽ *" required>
+        </div>
+        <input class="f" id="af-mat" placeholder="Материалы (например: Масло, холст)">
+        <textarea class="f" id="af-desc" rows="3" placeholder="Описание работы"></textarea>
+        <label>Фотография (можно добавить позже — будет заглушка)</label>
+        <input class="f" id="af-imgurl" placeholder="Или вставьте ссылку на фото">
+        <input class="f" id="af-imgfile" type="file" accept="image/*">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="af-craft"> 🎨 Это ручная работа (показывать на «Выставке»)
+        </label>
+        <button class="btn" type="submit">Добавить работу</button>
+      </form>
+    </div>
+
+    <div class="atab" id="atab-save">
+      <p class="hint">Картины, заявки, аукционы, опросы и отзывы хранятся в браузере. Чтобы всё жило всегда и открывалось у любого посетителя, скачайте файл сайта с данными — и размещайте именно его. В файл сайта не включаются личные данные пользователей (только в резервную копию).</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+        <button class="btn" id="save-site" type="button">⬇ Скачать сайт с данными</button>
+        <button class="close-admin" id="save-backup" type="button" style="margin-top:0">💾 Резервная копия (JSON)</button>
+        <label class="close-admin" style="margin-top:0;cursor:pointer;display:inline-block">📂 Загрузить из копии
+          <input type="file" id="load-backup" accept=".json,application/json" style="display:none">
+        </label>
+      </div>
+    </div>
+
+    <button class="close-admin" id="admin-close">Закрыть панель</button>
+    <p class="hint">⚠ Данные хранятся локально в браузере. При смене браузера или очистке данных используйте резервную копию или скачанный файл сайта.</p>
+  </div>
+</div>
+
+<script>
+/* ================= НАСТРОЙКА ================= */
+const ADMIN_PASS = "kva2026";   // ← пароль для входа в панель управления (измените!)
+const NOTIFY_EMAILS = ["web21veka.mult@gmail.com", "viktorykon2111@gmail.com"]; // уведомления
+const STORE_KEY  = "kva_paintings";
+const ORDERS_KEY = "kva_orders";
+const AUC_KEY    = "kva_auctions";
+const VISITS_KEY = "kva_stats";
+const REVIEWS_KEY= "kva_reviews";
+const POLLS_KEY  = "kva_polls";
+const USERS_KEY  = "kva_users";
+const CHATS_KEY  = "kva_chats";
+const SESSION_KEY= "kva_session";
+const AUCTION_HOURS = 12;       // ← время на перебивание ставки (часы)
+
+/* ================= ХРАНИЛИЩЕ ================= */
+const BUILT_IN = [];
+const BUILT_IN_AUCTIONS = [];
+const BUILT_IN_REVIEWS = [];
+const BUILT_IN_POLLS = [];
+
+function load(key, builtIn){
+  try{
+    const s = localStorage.getItem(key);
+    return s ? JSON.parse(s) : builtIn.slice();
+  }catch(e){ return builtIn.slice(); }
+}
+let paintings = load(STORE_KEY, BUILT_IN);
+let orders    = load(ORDERS_KEY, []);
+let auctions  = load(AUC_KEY, BUILT_IN_AUCTIONS);
+let reviews   = load(REVIEWS_KEY, BUILT_IN_REVIEWS);
+let polls     = load(POLLS_KEY, BUILT_IN_POLLS);
+let users     = load(USERS_KEY, []);
+let pchats    = load(CHATS_KEY, []);
+
+let nextId   = paintings.reduce((m,p)=>Math.max(m,p.id||0),0)+1;
+let nextOrd  = orders.reduce((m,o)=>Math.max(m,o.id||0),0)+1;
+let nextAuc  = auctions.reduce((m,a)=>Math.max(m,a.id||0),0)+1;
+let nextRev  = reviews.reduce((m,r)=>Math.max(m,r.id||0),0)+1;
+let nextPoll = polls.reduce((m,p)=>Math.max(m,p.id||0),0)+1;
+let nextChat = pchats.reduce((m,c)=>Math.max(m,c.id||0),0)+1;
+
+function saveAll(){
+  localStorage.setItem(STORE_KEY, JSON.stringify(paintings));
+  localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+  localStorage.setItem(AUC_KEY, JSON.stringify(auctions));
+  localStorage.setItem(REVIEWS_KEY, JSON.stringify(reviews));
+  localStorage.setItem(POLLS_KEY, JSON.stringify(polls));
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  localStorage.setItem(CHATS_KEY, JSON.stringify(pchats));
+  localStorage.setItem(VISITS_KEY, JSON.stringify(stats));
+  scheduleBackendPush();
+}
+
+/* ================= ОБЩИЙ БЭКЕНД (Supabase) =================
+   Данные (картины, заявки, чаты, аукционы, отзывы, опросы, аккаунты)
+   хранятся в облаке и ОБЩИЕ для всех посетителей сайта.
+   Подключение: создайте бесплатный проект на supabase.com,
+   выполните SQL из инструкции и вставьте URL и anon-ключ ниже.
+   Пока поля пустые - сайт работает как раньше (localStorage). */
+const SUPABASE_URL = "https://hyhezvgzlbgksklskfer.supabase.co";        // <- например https://abcdefgh.supabase.co
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5aGV6dmd6bGJna3NrbHNrZmVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA4NjIwODAsImV4cCI6MjEwNjQzODA4MH0.R24SU95n7Xp5RrOD5ZPG-Y0RmdTTp_5CNxIPISr3Ipk";   // <- anon public key (Settings -> API)
+const BACKEND_ON = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
+const REST_URL = BACKEND_ON ? SUPABASE_URL.replace(/\/$/, '') + "/rest/v1/kva_data" : "";
+let applyingRemote = false;
+let pushTimer = null;
+
+function backendHeaders(){
+  return { "apikey": SUPABASE_ANON_KEY, "Authorization": "Bearer " + SUPABASE_ANON_KEY,
+           "Content-Type": "application/json" };
+}
+function stateSnapshot(){
+  return { paintings, orders, auctions, reviews, polls, chats: pchats, users };
+}
+function scheduleBackendPush(){
+  if(!BACKEND_ON || applyingRemote) return;
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(backendPush, 1200);
+}
+async function backendPush(){
+  if(!BACKEND_ON || applyingRemote) return;
+  try{
+    await fetch(REST_URL + "?on_conflict=id", {
+      method: "POST",
+      headers: Object.assign(backendHeaders(), { "Prefer": "resolution=merge-duplicates" }),
+      body: JSON.stringify({ id: 1, data: stateSnapshot(), updated_at: new Date().toISOString() })
+    });
+  }catch(e){}
+}
+function mergeById(serverArr, localArr){
+  const map = new Map();
+  (localArr || []).forEach(x => { if(x && x.id !== undefined) map.set(x.id, x); });
+  (serverArr || []).forEach(s => {
+    const l = map.get(s.id);
+    if(!l){ map.set(s.id, s); return; }
+    if(Array.isArray(l.msgs) && Array.isArray(s.msgs)){
+      const keys = new Set(l.msgs.map(m => m.from + "|" + m.text + "|" + m.time));
+      map.set(s.id, Object.assign({}, s, { msgs: l.msgs.concat(s.msgs.filter(m => !keys.has(m.from + "|" + m.text + "|" + m.time))) }));
+    } else map.set(s.id, s);
+  });
+  return [...map.values()];
+}
+function mergePolls(serverPolls, localPolls){
+  serverPolls = serverPolls || []; localPolls = localPolls || [];
+  const merged = serverPolls.map(sp => {
+    const lp = localPolls.find(x => x.id === sp.id);
+    if(!lp) return sp;
+    const voters = Object.assign({}, lp.voters, sp.voters);
+    const options = sp.options.map(so => {
+      const lo = lp.options.find(o => o.paintingId === so.paintingId);
+      return lo ? { paintingId: so.paintingId, votes: Math.max(so.votes || 0, lo.votes || 0) } : so;
+    });
+    return Object.assign({}, sp, { options, voters });
+  });
+  localPolls.forEach(lp => { if(!serverPolls.some(sp => sp.id === lp.id)) merged.push(lp); });
+  return merged;
+}
+function refreshAllUI(){
+  renderGallery(); renderSold(); renderExpo(); renderAuctions();
+  renderPolls(); renderReviews(); renderStats();
+  if(document.getElementById('admin').classList.contains('open')){
+    renderAdminList(); renderOrdersAdmin(); renderChatsAdmin(); renderReviewsAdmin();
+    renderAuctionsAdmin(); renderPollsAdmin(); fillAuctionSelect(); fillPollChecks(); renderStats();
+  }
+}
+function applyRemoteState(srv){
+  if(!srv || typeof srv !== "object") return;
+  paintings = mergeById(srv.paintings, paintings);
+  orders    = mergeById(srv.orders, orders);
+  auctions  = mergeById(srv.auctions, auctions);
+  reviews   = mergeById(srv.reviews, reviews);
+  polls     = mergePolls(srv.polls, polls);
+  pchats    = mergeById(srv.chats, pchats);
+  users     = mergeById(srv.users, users);
+  nextId   = paintings.reduce((m,p)=>Math.max(m,p.id||0),0)+1;
+  nextOrd  = orders.reduce((m,o)=>Math.max(m,o.id||0),0)+1;
+  nextAuc  = auctions.reduce((m,a)=>Math.max(m,a.id||0),0)+1;
+  nextRev  = reviews.reduce((m,r)=>Math.max(m,r.id||0),0)+1;
+  nextPoll = polls.reduce((m,p)=>Math.max(m,p.id||0),0)+1;
+  nextChat = pchats.reduce((m,c)=>Math.max(m,c.id||0),0)+1;
+  applyingRemote = true;
+  saveAll();
+  applyingRemote = false;
+  refreshAllUI();
+}
+async function backendPull(){
+  if(!BACKEND_ON) return;
+  try{
+    const r = await fetch(REST_URL + "?id=eq.1&select=data", { headers: backendHeaders() });
+    if(!r.ok) return;
+    const rows = await r.json();
+    if(!rows || !rows.length || !rows[0].data){ await backendPush(); return; }
+    applyRemoteState(rows[0].data);
+  }catch(e){}
+}
+if(BACKEND_ON){
+  setTimeout(backendPull, 1500);
+  setInterval(backendPull, 12000);
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) backendPull(); });
+}
+
+/* ================= ПОЧТА: УВЕДОМЛЕНИЯ =================
+   Письма уходят на NOTIFY_EMAILS при каждом событии на сайте:
+   личные сообщения, сообщения в заявках, новые заявки,
+   ставки на аукционе, отзывы, регистрации.
+   Защита от дублей + один повтор через 60 сек при сбое. */
+const NOTIFY_SENT_KEY = 'kva_notify_sent';
+const retryTimers = {};
+
+function notifyEmails(subject, body, key){
+  try{
+    key = key || (subject + '|' + String(body).slice(0, 120));
+    let sent = [];
+    try{ sent = JSON.parse(localStorage.getItem(NOTIFY_SENT_KEY)) || []; }catch(e){}
+    if(sent.includes(key)) return;              // это уведомление уже отправлялось
+    sent.push(key);
+    localStorage.setItem(NOTIFY_SENT_KEY, JSON.stringify(sent.slice(-500)));
+  }catch(e){}
+  NOTIFY_EMAILS.forEach(em => sendOne(em, subject, body, key));
+}
+
+function sendOne(em, subject, body, key){
+  try{
+    fetch('https://formsubmit.co/ajax/' + em, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body: JSON.stringify({
+        _subject: subject,
+        _template: 'table',
+        _captcha: 'false',
+        _replyto: '',
+        'Сообщение': body
+      })
+    })
+    .then(r => { if(!r.ok) throw 0; })
+    .catch(() => retryLater(em, subject, body, key));
+  }catch(e){ retryLater(em, subject, body, key); }
+}
+
+function retryLater(em, subject, body, key){
+  if(String(key).includes('#retry')) return;    // только одна попытка повтора
+  const id = key + '|' + em;
+  if(retryTimers[id]) return;
+  retryTimers[id] = setTimeout(() => {
+    delete retryTimers[id];
+    sendOne(em, subject, body, key + '#retry');
+  }, 60000);
+}
+
+/* ================= СЕССИЯ / ID ================= */
+const browserId = (function(){
+  let id = localStorage.getItem('kva_browser');
+  if(!id){ id = 'b' + Math.random().toString(36).slice(2,10); localStorage.setItem('kva_browser', id); }
+  return id;
+})();
+function currentUser(){
+  const ph = localStorage.getItem(SESSION_KEY);
+  return ph ? users.find(u=>u.phone===ph) || null : null;
+}
+function requireAuth(){
+  if(currentUser()) return true;
+  toast("Войдите или зарегистрируйтесь, чтобы выполнить это действие.");
+  authModal.classList.add('open');
+  return false;
+}
+function renderUserLink(){
+  const u = currentUser();
+  document.getElementById('user-link').innerHTML = u
+    ? `${u.avatar ? `<img src="${u.avatar}">` : '👤'} ${u.name}`
+    : '👤 Профиль';
+}
+
+/* ================= СТАТИСТИКА ================= */
+function loadStats(){
+  try{ return JSON.parse(localStorage.getItem(VISITS_KEY)) || {total:0, byDay:{}}; }
+  catch(e){ return {total:0, byDay:{}}; }
+}
+let stats = loadStats();
+const today = new Date().toISOString().slice(0,10);
+stats.total = (stats.total||0) + 1;
+stats.byDay = stats.byDay || {};
+stats.byDay[today] = (stats.byDay[today]||0) + 1;
+localStorage.setItem(VISITS_KEY, JSON.stringify(stats));
+
+function renderStats(){
+  document.getElementById('st-visits').textContent = stats.total.toLocaleString('ru-RU');
+  document.getElementById('st-today').textContent  = (stats.byDay[today]||0).toLocaleString('ru-RU');
+  document.getElementById('st-paintings').textContent = paintings.length;
+  document.getElementById('st-orders').textContent = orders.length;
+  document.getElementById('auc-cnt').textContent = auctions.filter(a=>a.active).length;
+}
+
+const fmt = n => (Number(n)||0).toLocaleString('ru-RU') + ' ₽';
+const nowTime = () => new Date().toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+function onlyDigits(el){ el.addEventListener('input', ()=>{ el.value = el.value.replace(/\D/g,''); }); }
+document.querySelectorAll('#af-price,#af-auc-start,#li-phone,#rg-phone').forEach(onlyDigits);
+
+function phHTML(){ return `<div class="ph"><span>🖼</span><span>Фото скоро появится</span></div>`; }
+
+/* ================= НАВИГАЦИЯ ================= */
+function showPage(id){
+  document.querySelectorAll('.page').forEach(s=>s.classList.remove('active'));
+  const pg = document.getElementById(id);
+  if(pg) pg.classList.add('active');
+  document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('active', a.dataset.page===id));
+  window.scrollTo({top:0});
+}
+document.querySelectorAll('[data-page]').forEach(el=>{
+  el.addEventListener('click', e=>{e.preventDefault(); showPage(el.dataset.page);});
+});
+
+/* Папки галереи */
+document.querySelectorAll('.folder').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.folder').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    document.querySelectorAll('.fold').forEach(f=>f.style.display='none');
+    document.getElementById('fold-'+btn.dataset.fold).style.display='';
+    if(btn.dataset.fold==='auction') renderAuctions();
+  });
+});
+
+/* ================= ГРИДЫ ================= */
+function cardHTML(p, sold){
+  return `${sold ? '<div class="badge-sold">ПРОДАНА</div>' : ''}
+    ${p.craft ? '<div class="badge-craft">🎨 РУЧНАЯ РАБОТА</div>' : ''}
+    ${p.img ? `<img src="${p.img}" alt="">` : phHTML()}
+    <div class="info"><h3>${p.name}</h3><small>${p.tag||'Живопись'}${p.size? ' · '+p.size : ''}</small>
+    <div class="row"><span class="price">${fmt(p.price)}</span>
+    ${sold ? '' : '<button class="buy">Купить</button>'}</div></div>`;
+}
+const grid = document.getElementById('grid');
+function renderGallery(){
+  grid.innerHTML = '';
+  const avail = paintings.filter(p=>!p.sold && !p.craft);
+  avail.forEach(p=>{
+    const c = document.createElement('div');
+    c.className = 'card';
+    c.innerHTML = cardHTML(p,false);
+    c.onclick = ()=>openPainting(p.id);
+    grid.appendChild(c);
+  });
+  document.getElementById('empty').style.display = avail.length ? 'none' : 'block';
+  document.getElementById('cnt').textContent = avail.length;
+}
+function renderSold(){
+  const sg = document.getElementById('sold-grid');
+  sg.innerHTML = '';
+  const sold = paintings.filter(p=>p.sold);
+  sold.forEach(p=>{
+    const c = document.createElement('div');
+    c.className = 'card';
+    c.innerHTML = cardHTML(p,true);
+    c.onclick = ()=> p.craft ? openCraft(p.id) : openPainting(p.id);
+    sg.appendChild(c);
+  });
+  document.getElementById('sold-empty').style.display = sold.length ? 'none' : 'block';
+}
+function renderExpo(){
+  const eg = document.getElementById('expo-grid');
+  eg.innerHTML = '';
+  const expo = paintings.filter(p=>p.craft && !p.sold);
+  expo.forEach(p=>{
+    const c = document.createElement('div');
+    c.className = 'card';
+    c.innerHTML = cardHTML(p,false);
+    c.onclick = ()=>openCraft(p.id);
+    eg.appendChild(c);
+  });
+  document.getElementById('expo-empty').style.display = expo.length ? 'none' : 'block';
+}
+
+/* ================= СТРАНИЦА КАРТИНЫ ================= */
+let current = null;
+let currentOrder = null;
+
+function buyZoneHTML(p, prefix){
+  if(p.sold){
+    return {note:'<div class="sold-note">✔ Эта работа продана</div>', zone:''};
+  }
+  return {note:'', zone:`
+    <h3 style="margin:22px 0 4px">Купить ${p.craft?'эту работу':'эту картину'}</h3>
+    <p style="font-size:.9rem">Оставьте заявку — мы свяжемся для подтверждения и оплаты.</p>
+    <form class="order" id="${prefix}-order-form">
+      <input class="f" type="text" id="${prefix}-of-name" placeholder="Ваше имя" required>
+      <input class="f" type="tel" id="${prefix}-of-contact" placeholder="Телефон или e-mail" required>
+      <textarea class="f" rows="3" id="${prefix}-of-comment" placeholder="Комментарий (необязательно)"></textarea>
+      <button class="btn" type="submit">Оформить заказ</button>
+    </form>
+    <div id="${prefix}-buyer-chat"></div>`};
+}
+
+function openPainting(id){
+  const p = paintings.find(x=>x.id===id);
+  if(!p) return;
+  current = p;
+  document.getElementById('pd-img-wrap').innerHTML = p.img
+    ? `<img src="${p.img}" alt="${p.name}">`
+    : `<div class="pd-ph"><span>🖼</span><span>Фото скоро появится</span></div>`;
+  document.getElementById('pd-name').textContent = p.name;
+  document.getElementById('pd-tag').textContent  = p.tag || 'Живопись';
+  document.getElementById('pd-price').textContent = fmt(p.price);
+  document.getElementById('pd-desc').textContent = p.desc || 'Описание появится позже. Задайте вопрос автору в чате ниже.';
+  document.getElementById('pd-mat').textContent  = p.mat || 'уточняйте';
+  document.getElementById('pd-size').textContent = p.size || 'уточняйте';
+  const bz = buyZoneHTML(p,'of');
+  document.getElementById('pd-sold-note').innerHTML = bz.note;
+  document.getElementById('pd-buy-zone').innerHTML = bz.zone + `
+    <h3 style="margin:22px 0 4px">💬 Написать автору</h3>
+    <div id="pd-personal-chat"></div>`;
+  if(!p.sold){
+    const u = currentUser(); if(u) document.getElementById('of-of-name').value = u.name;
+    const uNow = currentUser();
+    currentOrder = orders.find(o => o.paintingId === p.id &&
+      (uNow ? (o.phone === uNow.phone || (!o.phone && o.browserId === browserId)) : o.browserId === browserId)) || null;
+    renderBuyerChat();
+    wireOrderForm('of', p);
+  }
+  renderPersonalChat('pd-personal-chat', 'Вопрос о картине «'+p.name+'»');
+  showPage('painting');
+}
+
+let currentCraft = null;
+let currentCraftOrder = null;
+function openCraft(id){
+  const p = paintings.find(x=>x.id===id);
+  if(!p) return;
+  currentCraft = p;
+  document.getElementById('cd-img-wrap').innerHTML = p.img
+    ? `<img src="${p.img}" alt="${p.name}">`
+    : `<div class="pd-ph"><span>🎨</span><span>Фото скоро появится</span></div>`;
+  document.getElementById('cd-name').textContent = p.name;
+  document.getElementById('cd-tag').textContent  = (p.tag || 'Ручная работа') + ' · выставка';
+  document.getElementById('cd-price').textContent = fmt(p.price);
+  document.getElementById('cd-desc').textContent = p.desc || 'Описание появится позже. Задайте вопрос автору в чате ниже.';
+  document.getElementById('cd-mat').textContent  = p.mat || 'уточняйте';
+  document.getElementById('cd-size').textContent = p.size || 'уточняйте';
+  const bz = buyZoneHTML(p,'cf');
+  document.getElementById('cd-sold-note').innerHTML = bz.note;
+  document.getElementById('cd-buy-zone').innerHTML = bz.zone + `
+    <h3 style="margin:22px 0 4px">💬 Написать автору</h3>
+    <div id="cd-personal-chat"></div>`;
+  if(!p.sold){
+    const u = currentUser(); if(u) document.getElementById('cf-of-name').value = u.name;
+    const uNowC = currentUser();
+    currentCraftOrder = orders.find(o => o.paintingId === p.id &&
+      (uNowC ? (o.phone === uNowC.phone || (!o.phone && o.browserId === browserId)) : o.browserId === browserId)) || null;
+    renderCraftBuyerChat();
+    wireOrderForm('cf', p);
+  }
+  renderPersonalChat('cd-personal-chat', 'Вопрос о работе «'+p.name+'»');
+  showPage('craft');
+}
+
+function wireOrderForm(prefix, p){
+  const form = document.getElementById(prefix+'-order-form');
+  if(!form) return;
+  form.addEventListener('submit', e=>{
+    e.preventDefault();
+    if(!requireAuth()) return;
+    const name = document.getElementById(prefix+'-of-name').value.trim();
+    const contact = document.getElementById(prefix+'-of-contact').value.trim();
+    const comment = document.getElementById(prefix+'-of-comment').value.trim();
+    if(!name || !contact){ toast("Заполните имя и контакт."); return; }
+    const ord = {
+      id: nextOrd++,
+      paintingId: p.id,
+      paintingName: p.name,
+      price: p.price,
+      buyer: name, contact, comment,
+      date: nowTime(),
+      browserId,
+      phone: (currentUser()||{}).phone || null,
+      confirmed: false,
+      msgs: [{from:'buyer', text: comment ? `Заявка: ${comment}` : 'Заявка на покупку.', time: nowTime()}]
+    };
+    orders.push(ord);
+    saveAll(); renderStats(); renderOrdersAdmin();
+    if(prefix==='of'){ currentOrder = ord; renderBuyerChat(); }
+    else { currentCraftOrder = ord; renderCraftBuyerChat(); }
+    notifyEmails(
+      'Новая заявка №'+ord.id+' — Kva art',
+      'Покупатель: '+ord.buyer+'\nКонтакт: '+ord.contact+'\nРабота: '+ord.paintingName+'\nЦена: '+fmt(ord.price)+'\nКомментарий: '+(ord.comment||'—')+'\nВремя: '+ord.date
+    );
+    toast(`✦ Заявка №${ord.id} отправлена! Пишите в чат — художник ответит здесь.`);
+  });
+}
+
+function renderBuyerChat(){
+  const wrap = document.getElementById('of-buyer-chat');
+  if(!wrap) return;
+  renderOrderChat(wrap, currentOrder, o=>{ currentOrder=o; });
+}
+function renderCraftBuyerChat(){
+  const wrap = document.getElementById('cf-buyer-chat');
+  if(!wrap) return;
+  renderOrderChat(wrap, currentCraftOrder, o=>{ currentCraftOrder=o; });
+}
+function renderOrderChat(wrap, ord, setOrd){
+  if(!ord){
+    wrap.innerHTML = '';
+    return;
+  }
+  wrap.innerHTML = `<div class="chat-box">
+    <h4>💬 Заявка №${ord.id} — переписка с художником</h4>
+    <div class="chat-msgs" data-msgs></div>
+    <div class="chat-row">
+      <input class="f" data-inp placeholder="Написать сообщение...">
+      <button class="btn small" data-send>➤</button>
+    </div>
+  </div>`;
+  const msgsBox = wrap.querySelector('[data-msgs]');
+  const renderMsgs = ()=>{
+    msgsBox.innerHTML = ord.msgs.map(m=>
+      `<div class="msg ${m.from==='buyer'?'me':'admin'}">${m.text}<small>${m.from==='buyer'?'Вы':'Kva art'} · ${m.time}</small></div>`
+    ).join('');
+    msgsBox.scrollTop = msgsBox.scrollHeight;
+  };
+  renderMsgs();
+  const inp = wrap.querySelector('[data-inp]');
+  const send = ()=>{
+    if(!requireAuth()) return;
+    const t = inp.value.trim();
+    if(!t) return;
+    ord.msgs.push({from:'buyer', text:t, time:nowTime()});
+    inp.value = '';
+    saveAll(); renderMsgs(); renderOrdersAdmin();
+    notifyEmails('🛒 Сообщение по заявке №' + ord.id + ' — Kva art',
+      'Покупатель: ' + ord.buyer + '\nКонтакт: ' + ord.contact + '\nРабота: ' + ord.paintingName + '\nСообщение: ' + t + '\nВремя: ' + nowTime(),
+      'ordermsg|' + ord.id + '|' + Date.now());
+  };
+  wrap.querySelector('[data-send]').onclick = send;
+  inp.addEventListener('keydown', e=>{ if(e.key==='Enter') send(); });
+}
+
+/* ================= ЛИЧНЫЙ ЧАТ С ХУДОЖНИКОМ ================= */
+function getOrCreatePersonalChat(topic){
+  const u = currentUser();
+  let ch = pchats.find(c=>c.phone===u.phone);
+  if(!ch){
+    ch = {id: nextChat++, phone: u.phone, name: u.name, topic, createdAt: nowTime(), msgs:[]};
+    pchats.push(ch);
+    saveAll();
+    notifyEmails(
+      'Новый личный чат — Kva art',
+      'Пользователь: '+u.name+'\nТелефон: '+u.phone+'\nТема: '+topic+'\nВремя: '+ch.createdAt+'\n\nНапишите ответ в панели управления → «Личные чаты».'
+    );
+  } else if(topic && ch.topic!==topic){
+    ch.topic = topic;
+    saveAll();
+  }
+  return ch;
+}
+function renderPersonalChat(containerId, topic){
+  const box = document.getElementById(containerId);
+  if(!box) return;
+  const u = currentUser();
+  if(!u){
+    box.innerHTML = `<div class="chat-box"><div class="auth-hint">💬 Личный чат доступен после <a data-auth-open>входа или регистрации</a>.</div></div>`;
+    box.querySelector('[data-auth-open]').onclick = ()=>authModal.classList.add('open');
+    return;
+  }
+  const ch = getOrCreatePersonalChat(topic);
+  box.innerHTML = `<div class="chat-box">
+    <h4>💬 Личный чат с художником</h4>
+    <div class="chat-msgs" data-msgs></div>
+    <div class="chat-row">
+      <input class="f" data-inp placeholder="Написать сообщение...">
+      <button class="btn small" data-send>➤</button>
+    </div>
+  </div>`;
+  const msgsBox = box.querySelector('[data-msgs]');
+  const renderMsgs = ()=>{
+    msgsBox.innerHTML = ch.msgs.length ? ch.msgs.map(m=>
+      `<div class="msg ${m.from==='user'?'me':'admin'}">${m.text}<small>${m.from==='user'?'Вы':'Kva art'} · ${m.time}</small></div>`
+    ).join('') : '<div class="auth-hint">Напишите первое сообщение — художник ответит здесь и в панели управления.</div>';
+    msgsBox.scrollTop = msgsBox.scrollHeight;
+  };
+  renderMsgs();
+  const inp = box.querySelector('[data-inp]');
+  const send = ()=>{
+    const t = inp.value.trim();
+    if(!t) return;
+    ch.msgs.push({from:'user', text:t, time:nowTime()});
+    inp.value = '';
+    saveAll(); renderMsgs(); renderChatsAdmin();
+    notifyEmails('✉️ Сообщение в личном чате — Kva art',
+      'Пользователь: ' + ch.name + '\nТелефон: ' + ch.phone + '\nТема: ' + (ch.topic || '—') + '\nСообщение: ' + t + '\nВремя: ' + nowTime(),
+      'pchat|' + ch.id + '|' + Date.now());
+  };
+  box.querySelector('[data-send]').onclick = send;
+  inp.addEventListener('keydown', e=>{ if(e.key==='Enter') send(); });
+}
+
+/* ================= АУКЦИОН ================= */
+function finalizeAuction(a){
+  if(!a.active) return;
+  a.active = false;
+  a.winner = a.leader || null;
+  a.finalBid = a.currentBid || a.startPrice;
+  saveAll();
+}
+function checkAuctionTimers(){
+  let changed = false;
+  auctions.forEach(a=>{
+    if(a.active && Date.now() >= a.endsAt){ finalizeAuction(a); changed = true; }
+  });
+  if(changed){ renderAuctions(); renderAuctionsAdmin(); renderStats(); }
+}
+function cdText(a){
+  let ms = a.endsAt - Date.now();
+  if(ms <= 0) return 'Аукцион завершён';
+  const h = Math.floor(ms/3600000);
+  const m = Math.floor(ms%3600000/60000);
+  const s = Math.floor(ms%60000/1000);
+  const pad = n => String(n).padStart(2,'0');
+  return `⏳ На перебивание осталось: ${pad(h)}:${pad(m)}:${pad(s)}`;
+}
+function renderAuctions(){
+  checkAuctionTimers();
+  const gridA = document.getElementById('auc-grid');
+  gridA.innerHTML = '';
+  const shown = auctions.filter(a=> paintings.find(x=>x.id===a.paintingId) || !a.active);
+  const activeCount = auctions.filter(a=>a.active).length;
+  document.getElementById('auc-empty').style.display = activeCount ? 'none' : 'block';
+  document.getElementById('auc-cnt').textContent = activeCount;
+  const u = currentUser();
+  const myName = u ? u.name : '';
+
+  shown.slice().reverse().forEach(a=>{
+    const p = paintings.find(x=>x.id===a.paintingId);
+    const card = document.createElement('div');
+    card.className = 'auc-card';
+    let banner = '';
+    if(!a.active){
+      if(a.winner && myName && a.winner === myName){
+        banner = `<div class="auc-banner win">🏆 Поздравляем, вы выиграли аукцион! Работа «${p?p.name:''}» ваша по цене ${fmt(a.finalBid)}.<br>
+        📧 web21veka.mult@gmail.com · viktorykon2111@gmail.com<br>
+        📱 +7 995 221-58-01 (Telegram / Max) · +7 960 472-93-02 (Telegram / Max)<br>
+        Напишите нам любым удобным способом, чтобы оформить получение.</div>`;
+      } else {
+        banner = `<div class="auc-banner end">🏁 Аукцион завершён. Работу купил: <b>${a.winner || '—'}</b> — ${fmt(a.finalBid || a.startPrice)}</div>`;
+      }
+    }
+    if(a.active){
+      const minBid = (a.currentBid || a.startPrice) + 100;
+      card.innerHTML = `
+        ${p && p.img ? `<img src="${p.img}" alt="">` : phHTML()}
+        <div class="auc-body">
+          <h3>${p ? p.name : 'Работа удалена'}</h3>
+          <small style="color:var(--muted)">${p ? (p.tag||'Живопись')+(p.size?' · '+p.size:'') : ''}</small>
+          <div class="auc-bid">${fmt(a.currentBid || a.startPrice)}</div>
+          <div class="auc-lead">${a.currentBid ? `Лидирует: <b>${a.leader}</b>` : `Стартовая цена · шаг от 100 ₽`}</div>
+          <div class="auc-cd" data-cd="${a.id}">${cdText(a)}</div>
+          <div class="auc-history">
+            ${a.bids.length ? a.bids.slice().reverse().map(b=>
+              `<div><span><b>${b.nick}</b></span><span>${fmt(b.amount)} · ${b.time}</span></div>`).join('')
+            : '<div>Пока нет ставок — станьте первым!</div>'}
+          </div>
+          <div class="auc-form">
+            <input class="f" id="an-${a.id}" placeholder="Ваше имя" value="${myName}">
+            <input class="f" id="ab-${a.id}" type="text" inputmode="numeric" placeholder="Ваша ставка, ₽ (мин. ${fmt(minBid)})">
+            <button class="btn" data-auc="${a.id}">Сделать ставку</button>
+          </div>
+        </div>`;
+      gridA.appendChild(card);
+      onlyDigits(card.querySelector('#ab-'+a.id));
+      card.querySelector('[data-auc]').onclick = ()=>{
+        if(!requireAuth()) return;
+        const nick = card.querySelector('#an-'+a.id).value.trim();
+        const amount = Number(card.querySelector('#ab-'+a.id).value);
+        if(!nick){ toast("Укажите имя."); return; }
+        if(!amount || amount < minBid){
+          toast(`Ставка должна быть не меньше ${fmt(minBid)} (шаг 100 ₽).`); return;
+        }
+        if(Date.now() >= a.endsAt){ checkAuctionTimers(); toast("Время аукциона истекло."); return; }
+        a.bids.push({nick, amount, time: nowTime()});
+        a.currentBid = amount;
+        a.leader = nick;
+        saveAll(); renderAuctions(); renderAuctionsAdmin(); renderStats();
+        notifyEmails('🔨 Новая ставка на аукционе — Kva art',
+          'Ставка: ' + fmt(amount) + '\nУчастник: ' + nick + '\nРабота: ' + (p ? p.name : '—') + '\nВремя: ' + nowTime(),
+          'bid|' + a.id + '|' + Date.now());
+        toast(`🔨 ${nick}, ваша ставка ${fmt(amount)} принята!`);
+      };
+    } else {
+      card.innerHTML = `
+        ${p && p.img ? `<img src="${p.img}" alt="">` : phHTML()}
+        <div class="auc-body">
+          <h3>${p ? p.name : 'Работа удалена'}</h3>
+          ${banner}
+          <div class="auc-history">
+            ${a.bids.length ? a.bids.slice().reverse().map(b=>
+              `<div><span><b>${b.nick}</b></span><span>${fmt(b.amount)} · ${b.time}</span></div>`).join('')
+            : '<div>Ставок не было</div>'}
+          </div>
+        </div>`;
+      gridA.appendChild(card);
+    }
+  });
+}
+setInterval(()=>{
+  document.querySelectorAll('[data-cd]').forEach(el=>{
+    const a = auctions.find(x=>x.id==el.dataset.cd);
+    if(a) el.textContent = cdText(a);
+  });
+  checkAuctionTimers();
+}, 1000);
+
+/* ================= ОПРОСЫ ================= */
+function renderPolls(){
+  const wrap = document.getElementById('polls-wrap');
+  wrap.innerHTML = '';
+  const active = polls.filter(p=>p.active);
+  if(!active.length){ wrap.innerHTML = '<p class="empty">Опросов сейчас нет. Следующий аукцион каждые 48 часов!</p>'; return; }
+  active.forEach(pl=>{
+    const total = pl.options.reduce((s,o)=>s+o.votes,0);
+    const myVote = pl.voters[browserId];
+    const card = document.createElement('div');
+    card.className = 'poll-card';
+    card.innerHTML = `<h3>Какую картину выставить на следующий аукцион?</h3>
+      <p class="hint" style="margin-bottom:14px">Аукцион каждые 48 часов · голосов: ${total}</p>`;
+    pl.options.forEach((o,i)=>{
+      const p = paintings.find(x=>x.id===o.paintingId);
+      const pct = total ? Math.round(o.votes/total*100) : 0;
+      const opt = document.createElement('div');
+      opt.className = 'poll-opt';
+      opt.innerHTML = `
+        <div class="po-row">
+          <b>${p ? p.name : 'работа удалена'}</b>
+          ${myVote===undefined ? `<button class="btn small" data-vote="${i}">Голосовать</button>` : `<span style="color:var(--amber);font-weight:700">${o.votes} гол. · ${pct}%</span>`}
+        </div>
+        <div class="poll-bar"><div style="width:${pct}%"></div></div>`;
+      if(myVote===undefined){
+        opt.querySelector('[data-vote]').onclick = ()=>{
+          if(!requireAuth()) return;
+          pl.voters[browserId] = i;
+          o.votes++;
+          saveAll(); renderPolls(); renderPollsAdmin();
+          toast("Ваш голос учтён! ✦");
+        };
+      }
+      card.appendChild(opt);
+    });
+    if(myVote!==undefined) card.innerHTML += '<p class="hint">✓ Вы уже проголосовали. Результаты обновляются автоматически.</p>';
+    wrap.appendChild(card);
+  });
+}
+
+/* ================= ОТЗЫВЫ (КИТЫ) ================= */
+let revRating = 5;
+function drawFrogsInput(){
+  const box = document.getElementById('rv-frogs');
+  box.innerHTML = '';
+  for(let i=1;i<=5;i++){
+    const s = document.createElement('span');
+    s.innerHTML = frogSVG(i<=revRating);
+    s.style.cssText = 'cursor:pointer;display:inline-flex;transition:transform .15s,opacity .15s;opacity:'+(i<=revRating ? 1 : .4);
+    s.onmouseenter = ()=>{ s.style.transform = 'scale(1.15)'; };
+    s.onmouseleave = ()=>{ s.style.transform = ''; };
+    s.onclick = ()=>{ revRating = i; drawFrogsInput(); };
+    box.appendChild(s);
+  }
+}
+function frogSVG(on){
+  const style = on
+    ? 'filter:hue-rotate(-95deg) saturate(1.5) brightness(1.08) drop-shadow(0 0 6px rgba(251,191,36,.5));opacity:1'
+    : 'filter:grayscale(.85);opacity:.4';
+  return `<span style="display:inline-block;font-size:26px;line-height:1;vertical-align:-3px;${style}">🐸</span>`;
+}
+const frogs = n => { let s = ''; for(let i = 1; i <= 5; i++) s += frogSVG(i <= n); return s; };
+function renderReviews(){
+  const list = document.getElementById('rev-list');
+  list.innerHTML = '';
+  const shown = reviews.filter(r=>r.approved);
+  if(shown.length){
+    const avg = shown.reduce((s,r)=>s+r.rating,0)/shown.length;
+    document.getElementById('rev-avg').textContent = avg.toFixed(1);
+    document.getElementById('rev-avg-sub').innerHTML = frogSVG(true) + ' средняя оценка · отзывов: ' + shown.length;
+  } else {
+    document.getElementById('rev-avg').textContent = '—';
+    document.getElementById('rev-avg-sub').textContent = 'пока нет отзывов';
+  }
+  shown.slice().reverse().forEach(r=>{
+    const d = document.createElement('div');
+    d.className = 'rev-item';
+    d.innerHTML = `<div class="r-head"><b>${r.name}</b><span class="r-frogs">${frogs(r.rating)}</span></div>
+      <p>${r.text}</p><small style="display:block;margin-top:8px">${r.date}</small>`;
+    list.appendChild(d);
+  });
+}
+document.getElementById('rev-form').addEventListener('submit', e=>{
+  e.preventDefault();
+  if(!requireAuth()) return;
+  const name = document.getElementById('rv-name').value.trim();
+  const text = document.getElementById('rv-text').value.trim();
+  if(!name || !text){ toast("Заполните имя и отзыв."); return; }
+  reviews.push({id: nextRev++, name, rating: revRating, text, date: nowTime(), approved: false});
+  notifyEmails('🐸 Новый отзыв — Kva art',
+    'Имя: ' + name + '\nОценка: ' + revRating + '/5 🐸\nОтзыв: ' + text + '\nВремя: ' + nowTime(),
+    'review|' + name + '|' + Date.now());
+  saveAll(); renderReviews(); renderReviewsAdmin();
+  e.target.reset(); revRating = 5; drawFrogsInput();
+  const u = currentUser(); if(u) document.getElementById('rv-name').value = u.name;
+  toast("Спасибо! Ваш отзыв появится на сайте после проверки. 🐸");
+});
+
+/* ================= АВТОРИЗАЦИЯ ================= */
+const authModal = document.getElementById('auth-modal');
+document.getElementById('user-link').addEventListener('click', ()=>showPage('profile'));
+document.getElementById('auth-close').addEventListener('click', ()=>authModal.classList.remove('open'));
+document.getElementById('tab-login').addEventListener('click', function(){
+  this.classList.add('on'); document.getElementById('tab-reg').classList.remove('on');
+  document.getElementById('form-login').style.display = ''; document.getElementById('form-reg').style.display = 'none';
+});
+document.getElementById('tab-reg').addEventListener('click', function(){
+  this.classList.add('on'); document.getElementById('tab-login').classList.remove('on');
+  document.getElementById('form-reg').style.display = ''; document.getElementById('form-login').style.display = 'none';
+});
+document.getElementById('form-reg').addEventListener('submit', e=>{
+  e.preventDefault();
+  const name = document.getElementById('rg-name').value.trim();
+  const phone = document.getElementById('rg-phone').value.trim();
+  const pass = document.getElementById('rg-pass').value;
+  if(phone.replace(/\D/g,'').length < 10){ toast("Введите корректный номер телефона."); return; }
+  if(pass.length < 4){ toast("Пароль минимум 4 символа."); return; }
+  if(users.some(u=>u.phone===phone)){ toast("Этот номер уже зарегистрирован — войдите."); return; }
+  users.push({name, phone, pass, avatar:null});
+  notifyEmails('👤 Новая регистрация на сайте — Kva art',
+    'Имя: ' + name + '\nТелефон: ' + phone + '\nВремя: ' + nowTime(),
+    'reg|' + phone + '|' + Date.now());
+  localStorage.setItem(SESSION_KEY, phone);
+  saveAll(); renderUserLink(); renderProfile(); afterAuth();
+  authModal.classList.remove('open');
+  toast(`Добро пожаловать, ${name}! ✦`);
+});
+document.getElementById('form-login').addEventListener('submit', e=>{
+  e.preventDefault();
+  const phone = document.getElementById('li-phone').value.trim();
+  const pass = document.getElementById('li-pass').value;
+  const u = users.find(x=>x.phone===phone && x.pass===pass);
+  if(!u){ toast("Неверный номер или пароль."); return; }
+  localStorage.setItem(SESSION_KEY, phone);
+  renderUserLink(); renderProfile(); afterAuth();
+  authModal.classList.remove('open');
+  toast(`С возвращением, ${u.name}! ✦`);
+});
+function afterAuth(){
+  renderAuctions();
+  renderPersonalChat('contact-personal-chat','Общий вопрос');
+  if(current && !current.sold) openPainting(current.id);
+  if(currentCraft && !currentCraft.sold) openCraft(currentCraft.id);
+}
+
+/* ================= ПРОФИЛЬ ================= */
+function renderProfile(){
+  const box = document.getElementById('profile-card');
+  const u = currentUser();
+  if(!u){
+    box.innerHTML = `<p style="color:var(--muted);line-height:1.7">Чтобы покупать картины, делать ставки, голосовать, оставлять отзывы и общаться с художником — войдите или зарегистрируйтесь по номеру телефона.</p>
+      <button class="btn" style="margin-top:18px" id="go-auth">Войти / Регистрация</button>`;
+    document.getElementById('go-auth').onclick = ()=>authModal.classList.add('open');
+    return;
+  }
+  box.innerHTML = `
+    <div class="avatar" id="p-avatar">${u.avatar ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">` : '👤'}</div>
+    <input type="file" id="p-avatar-file" accept="image/*" style="display:none">
+    <button class="btn small" id="p-avatar-btn" style="margin-bottom:18px">📷 Сменить фото профиля</button>
+    <div class="p-row"><span>Имя</span><b>${u.name}</b></div>
+    <div class="p-row"><span>Телефон</span><b>${u.phone}</b></div>
+    <div class="p-row"><span>На сайте с</span><b>${u.createdAt || '—'}</b></div>
+    <button class="close-admin" id="p-logout" style="width:100%;margin-top:20px">🚪 Выйти из аккаунта</button>`;
+  document.getElementById('p-avatar-btn').onclick = ()=>document.getElementById('p-avatar-file').click();
+  document.getElementById('p-avatar-file').addEventListener('change', e=>{
+    const f = e.target.files[0];
+    if(!f) return;
+    if(f.size > 1.5*1024*1024){ toast("Фото больше 1,5 МБ — выберите меньшее."); return; }
+    const r = new FileReader();
+    r.onload = ev=>{
+      u.avatar = ev.target.result;
+      saveAll(); renderUserLink(); renderProfile();
+      toast("Фото профиля обновлено ✓");
+    };
+    r.readAsDataURL(f);
+  });
+  document.getElementById('p-logout').onclick = ()=>{
+    localStorage.removeItem(SESSION_KEY);
+    renderUserLink(); renderProfile(); afterAuth();
+    toast("Вы вышли из аккаунта.");
+  };
+}
+
+/* ================= УВЕДОМЛЕНИЯ ================= */
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 5000);
+}
+
+/* ================= АДМИН-ПАНЕЛЬ ================= */
+const adminOverlay = document.getElementById('admin');
+
+document.getElementById('admin-link').addEventListener('click', e=>{
+  e.preventDefault();
+  const pass = prompt("Введите пароль для входа в панель управления:");
+  if(pass === null) return;
+  if(pass === ADMIN_PASS){ openAdmin(); }
+  else toast("Неверный пароль.");
+});
+document.getElementById('admin-close').addEventListener('click', ()=>adminOverlay.classList.remove('open'));
+
+/* Вкладки внутри панели */
+document.querySelectorAll('[data-atab]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('[data-atab]').forEach(b=>b.classList.remove('on'));
+    document.querySelectorAll('.atab').forEach(s=>s.classList.remove('on'));
+    btn.classList.add('on');
+    document.getElementById('atab-'+btn.dataset.atab).classList.add('on');
+  });
+});
+
+function openAdmin(){
+  renderStats(); renderOrdersAdmin(); renderChatsAdmin(); renderReviewsAdmin();
+  renderAuctionsAdmin(); renderPollsAdmin(); renderAdminList();
+  fillAuctionSelect(); fillPollChecks();
+  adminOverlay.classList.add('open');
+}
+
+/* --- Заявки --- */
+function renderOrdersAdmin(){
+  const list = document.getElementById('orders-list');
+  list.innerHTML = '';
+  if(!orders.length){ list.innerHTML = '<p class="hint">Заявок пока нет.</p>'; return; }
+  orders.slice().reverse().forEach(o=>{
+    const card = document.createElement('div');
+    card.className = 'order-card';
+    card.innerHTML = `
+      <div class="oc-head">
+        <span>№<b>${o.id}</b> · <b>${o.paintingName}</b> · ${fmt(o.price)} ${o.confirmed?'· <span style="color:var(--green)">✔ покупка подтверждена</span>':''}</span>
+        <small>${o.buyer} · ${o.contact} · ${o.date}</small>
+      </div>
+      <div class="chat-msgs" data-msgs></div>
+      <div class="chat-row">
+        <input class="f" placeholder="Ответить покупателю...">
+        <button class="btn small">➤</button>
+        ${o.confirmed ? '' : '<button class="ok-btn">✔ Подтвердить покупку</button>'}
+        <button class="del">Удалить</button>
+      </div>`;
+    const msgsBox = card.querySelector('[data-msgs]');
+    const renderMsgs = ()=>{
+      msgsBox.innerHTML = o.msgs.map(m=>
+        `<div class="msg ${m.from==='admin'?'me':'admin'}">${m.text}<small>${m.from==='admin'?'Вы':'Покупатель'} · ${m.time}</small></div>`
+      ).join('');
+      msgsBox.scrollTop = msgsBox.scrollHeight;
+    };
+    renderMsgs();
+    const inp = card.querySelector('input');
+    const send = ()=>{
+      const t = inp.value.trim();
+      if(!t) return;
+      o.msgs.push({from:'admin', text:t, time:nowTime()});
+      inp.value = '';
+      saveAll(); renderMsgs();
+      toast("Ответ отправлен в чат покупателя ✓");
+    };
+    card.querySelector('.btn').onclick = send;
+    inp.addEventListener('keydown', e=>{ if(e.key==='Enter') send(); });
+    const okBtn = card.querySelector('.ok-btn');
+    if(okBtn){
+      okBtn.onclick = ()=>{
+        if(confirm(`Подтвердить покупку «${o.paintingName}»? Она переместится в «Купленные».`)){
+          o.confirmed = true;
+          const p = paintings.find(x=>x.id===o.paintingId);
+          if(p) p.sold = true;
+          o.msgs.push({from:'admin', text:'Покупка подтверждена! Спасибо, что выбрали Kva art ✦', time:nowTime()});
+          saveAll(); renderMsgs();
+          renderGallery(); renderSold(); renderExpo(); renderAdminList(); fillAuctionSelect(); fillPollChecks(); renderStats();
+          toast("Покупка подтверждена — работа в папке «Купленные».");
+        }
+      };
+    }
+    card.querySelector('.del').onclick = ()=>{
+      if(confirm(`Удалить заявку №${o.id} от ${o.buyer}?`)){
+        orders = orders.filter(x=>x.id!==o.id);
+        saveAll(); renderOrdersAdmin(); renderStats();
+        toast("Заявка удалена.");
+      }
+    };
+    list.appendChild(card);
+  });
+}
+
+/* --- Личные чаты (админ) --- */
+function renderChatsAdmin(){
+  const list = document.getElementById('admin-chats');
+  list.innerHTML = '';
+  if(!pchats.length){ list.innerHTML = '<p class="hint">Личных чатов пока нет.</p>'; return; }
+  pchats.slice().reverse().forEach(ch=>{
+    const card = document.createElement('div');
+    card.className = 'order-card';
+    card.innerHTML = `
+      <div class="oc-head">
+        <span><b>${ch.name}</b> · ${ch.phone}</span>
+        <small>${ch.topic||''} · начат ${ch.createdAt}</small>
+      </div>
+      <div class="chat-msgs" data-msgs></div>
+      <div class="chat-row">
+        <input class="f" placeholder="Ответить...">
+        <button class="btn small">➤</button>
+        <button class="del">Удалить</button>
+      </div>`;
+    const msgsBox = card.querySelector('[data-msgs]');
+    const renderMsgs = ()=>{
+      msgsBox.innerHTML = ch.msgs.length ? ch.msgs.map(m=>
+        `<div class="msg ${m.from==='admin'?'me':'admin'}">${m.text}<small>${m.from==='admin'?'Вы':'Пользователь'} · ${m.time}</small></div>`
+      ).join('') : '<p class="hint">Сообщений нет.</p>';
+      msgsBox.scrollTop = msgsBox.scrollHeight;
+    };
+    renderMsgs();
+    const inp = card.querySelector('input');
+    const send = ()=>{
+      const t = inp.value.trim();
+      if(!t) return;
+      ch.msgs.push({from:'admin', text:t, time:nowTime()});
+      inp.value = '';
+      saveAll(); renderMsgs();
+      toast("Ответ отправлен ✓");
+    };
+    card.querySelector('.btn').onclick = send;
+    inp.addEventListener('keydown', e=>{ if(e.key==='Enter') send(); });
+    card.querySelector('.del').onclick = ()=>{
+      if(confirm(`Удалить чат с ${ch.name}?`)){
+        pchats = pchats.filter(x=>x.id!==ch.id);
+        saveAll(); renderChatsAdmin();
+        toast("Чат удалён.");
+      }
+    };
+    list.appendChild(card);
+  });
+}
+
+/* --- Отзывы (админ) --- */
+function renderReviewsAdmin(){
+  const list = document.getElementById('admin-reviews');
+  list.innerHTML = '';
+  if(!reviews.length){ list.innerHTML = '<p class="hint">Отзывов пока нет.</p>'; return; }
+  const pending = reviews.filter(r=>!r.approved).length;
+  if(pending){
+    const info = document.createElement('p');
+    info.className = 'hint';
+    info.innerHTML = `⏳ Ожидают публикации: <b style="color:var(--amber)">${pending}</b> — подтвердите кнопкой «✔ Опубликовать».`;
+    list.appendChild(info);
+  }
+  reviews.slice().reverse().forEach(r=>{
+    const row = document.createElement('div');
+    row.className = 'admin-item';
+    row.innerHTML = `
+      <div class="nm"><b>${frogs(r.rating)}</b> · ${r.name}${r.approved ? ' <small style="color:var(--green)">✔ опубликован</small>' : ' <small style="color:var(--amber)">⏳ на модерации</small>'}<small>${r.text} · ${r.date}</small></div>
+      ${r.approved ? '' : '<button class="ok-btn">✔ Опубликовать</button>'}
+      <button class="del">Удалить</button>`;
+    const okBtn = row.querySelector('.ok-btn');
+    if(okBtn){
+      okBtn.onclick = ()=>{
+        r.approved = true;
+        saveAll(); renderReviewsAdmin(); renderReviews();
+        toast("Отзыв опубликован на сайте ✓");
+      };
+    }
+    row.querySelector('.del').onclick = ()=>{
+      if(confirm(`Удалить отзыв от ${r.name}?`)){
+        reviews = reviews.filter(x=>x.id!==r.id);
+        saveAll(); renderReviewsAdmin(); renderReviews();
+        toast("Отзыв удалён.");
+      }
+    };
+    list.appendChild(row);
+  });
+}
+
+/* --- Аукционы (админ) --- */
+function fillAuctionSelect(){
+  const sel = document.getElementById('af-auc-painting');
+  const avail = paintings.filter(p=>!p.sold);
+  sel.innerHTML = '<option value="">— выберите работу —</option>' +
+    avail.map(p=>`<option value="${p.id}">${p.name} (${fmt(p.price)})</option>`).join('');
+}
+function renderAuctionsAdmin(){
+  const list = document.getElementById('admin-auc-list');
+  list.innerHTML = '';
+  if(!auctions.length){ list.innerHTML = '<p class="hint">Аукционов ещё не было.</p>'; return; }
+  auctions.slice().reverse().forEach(a=>{
+    const p = paintings.find(x=>x.id===a.paintingId);
+    const row = document.createElement('div');
+    row.className = 'admin-item';
+    row.innerHTML = `
+      <div class="ph-mini">${a.active?'🔨':'🏁'}</div>
+      <div class="nm">${p ? p.name : 'работа удалена'}<small>${a.active?'Активен · '+cdText(a):'Завершён'} · ставок: ${a.bids.length}${a.currentBid?' · текущая: '+fmt(a.currentBid)+' ('+a.leader+')':''}</small></div>
+      ${a.active ? '<button class="ok-btn">Завершить</button>' : ''}
+      <button class="del">Удалить</button>`;
+    const btns = row.querySelectorAll('button');
+    if(a.active){
+      btns[0].onclick = ()=>{
+        if(confirm('Завершить аукцион досрочно? Работу купит последний лидер.')){
+          finalizeAuction(a);
+          renderAuctions(); renderAuctionsAdmin(); renderStats();
+          toast(`Аукцион завершён. Работу купил: ${a.winner||'—'} — ${fmt(a.finalBid||a.startPrice)}`);
+        }
+      };
+    }
+    btns[btns.length-1].onclick = ()=>{
+      if(confirm('Удалить аукцион полностью?')){
+        auctions = auctions.filter(x=>x.id!==a.id);
+        saveAll(); renderAuctions(); renderAuctionsAdmin(); renderStats();
+        toast("Аукцион удалён.");
+      }
+    };
+    list.appendChild(row);
+  });
+}
+document.getElementById('auc-form').addEventListener('submit', e=>{
+  e.preventDefault();
+  const pid = Number(document.getElementById('af-auc-painting').value);
+  const start = Number(document.getElementById('af-auc-start').value);
+  const p = paintings.find(x=>x.id===pid);
+  if(!p){ toast("Выберите работу."); return; }
+  if(!start || start < 100){ toast("Укажите стартовую цену (от 100 ₽)."); return; }
+  auctions.push({
+    id: nextAuc++, paintingId: pid, startPrice: start,
+    currentBid: 0, leader:'', bids:[], active:true,
+    createdAt: Date.now(), endsAt: Date.now() + AUCTION_HOURS*3600000
+  });
+  saveAll(); renderAuctions(); renderAuctionsAdmin(); renderStats();
+  e.target.reset();
+  toast(`🔨 Аукцион на «${p.name}» запущен! На перебивание — ${AUCTION_HOURS} часов.`);
+});
+
+/* --- Опросы (админ) --- */
+function fillPollChecks(){
+  const box = document.getElementById('poll-checks');
+  const avail = paintings.filter(p=>!p.sold);
+  box.innerHTML = avail.length
+    ? avail.map(p=>`<label><input type="checkbox" value="${p.id}"> ${p.name}</label>`).join('')
+    : '<span class="hint">Нет доступных работ</span>';
+}
+function renderPollsAdmin(){
+  const list = document.getElementById('admin-polls');
+  list.innerHTML = '';
+  if(!polls.length){ list.innerHTML = '<p class="hint">Опросов ещё не было.</p>'; return; }
+  polls.slice().reverse().forEach(pl=>{
+    const total = pl.options.reduce((s,o)=>s+o.votes,0);
+    const row = document.createElement('div');
+    row.className = 'admin-item';
+    row.innerHTML = `
+      <div class="ph-mini">${pl.active?'🗳':'🏁'}</div>
+      <div class="nm">Опрос #${pl.id}<small>${pl.active?'Активен':'Завершён'} · вариантов: ${pl.options.length} · голосов: ${total}</small></div>
+      ${pl.active ? '<button class="ok-btn">Завершить</button>' : ''}
+      <button class="del">Удалить</button>`;
+    const btns = row.querySelectorAll('button');
+    if(pl.active){
+      btns[0].onclick = ()=>{
+        if(confirm('Завершить опрос?')){
+          pl.active = false;
+          saveAll(); renderPolls(); renderPollsAdmin();
+          toast("Опрос завершён.");
+        }
+      };
+    }
+    btns[btns.length-1].onclick = ()=>{
+      if(confirm('Удалить опрос?')){
+        polls = polls.filter(x=>x.id!==pl.id);
+        saveAll(); renderPolls(); renderPollsAdmin();
+        toast("Опрос удалён.");
+      }
+    };
+    list.appendChild(row);
+  });
+}
+document.getElementById('poll-form').addEventListener('submit', e=>{
+  e.preventDefault();
+  const ids = [...document.querySelectorAll('#poll-checks input:checked')].map(i=>Number(i.value));
+  if(ids.length < 2){ toast("Отметьте минимум 2 работы."); return; }
+  polls.forEach(p=>{ if(p.active) p.active = false; });
+  polls.push({id: nextPoll++, options: ids.map(id=>({paintingId:id, votes:0})), voters:{}, active:true, createdAt: nowTime()});
+  saveAll(); renderPolls(); renderPollsAdmin();
+  toast("Опрос создан! Посетители уже могут голосовать.");
+});
+
+/* --- Работы (админ) --- */
+function renderAdminList(){
+  const list = document.getElementById('admin-list');
+  list.innerHTML = '';
+  if(!paintings.length){ list.innerHTML = '<p class="hint">Галерея пуста.</p>'; return; }
+  paintings.forEach(p=>{
+    const row = document.createElement('div');
+    row.className = 'admin-item';
+    row.innerHTML = `${p.img ? `<img src="${p.img}">` : `<div class="ph-mini">${p.craft?'🎨':'🖼'}</div>`}
+      <div class="nm">${p.name} ${p.craft?'<small style="color:var(--amber)">🎨 ручная работа</small>':''} ${p.sold?'<small style="color:var(--green)">✔ продана</small>':''}<small>${fmt(p.price)}${p.size? ' · '+p.size : ''}</small></div>
+      <button class="del">Удалить</button>`;
+    row.querySelector('.del').onclick = ()=>{
+      if(confirm(`Удалить «${p.name}»?`)){
+        paintings = paintings.filter(x=>x.id!==p.id);
+        saveAll();
+        renderGallery(); renderSold(); renderExpo(); renderAdminList(); fillAuctionSelect(); fillPollChecks(); renderStats();
+        toast("Работа удалена.");
+      }
+    };
+    list.appendChild(row);
+  });
+}
+
+let uploadedImg = null;
+document.getElementById('af-imgfile').addEventListener('change', e=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  if(f.size > 2.5*1024*1024){ toast("Фото больше 2,5 МБ — уменьшите его или используйте ссылку."); e.target.value=''; return; }
+  const r = new FileReader();
+  r.onload = ev => { uploadedImg = ev.target.result; toast("Фото загружено ✓"); };
+  r.readAsDataURL(f);
+});
+document.getElementById('admin-form').addEventListener('submit', e=>{
+  e.preventDefault();
+  const name = document.getElementById('af-name').value.trim();
+  const price = Number(document.getElementById('af-price').value);
+  if(!name || !price){ toast("Заполните название и цену."); return; }
+  const img = uploadedImg || document.getElementById('af-imgurl').value.trim() || null;
+  paintings.push({
+    id: nextId++, name, sold:false,
+    craft: document.getElementById('af-craft').checked,
+    tag:  document.getElementById('af-tag').value.trim(),
+    size: document.getElementById('af-size').value.trim(),
+    mat:  document.getElementById('af-mat').value.trim(),
+    desc: document.getElementById('af-desc').value.trim(),
+    price, img
+  });
+  saveAll();
+  renderGallery(); renderSold(); renderExpo(); renderAdminList(); fillAuctionSelect(); fillPollChecks(); renderStats();
+  e.target.reset();
+  uploadedImg = null;
+  toast(`Работа «${name}» добавлена ✦`);
+});
+
+/* --- Сохранение --- */
+document.getElementById('save-site').addEventListener('click', ()=>{
+  const snapshot = document.documentElement.outerHTML;
+  const withData = snapshot
+    .replace('const BUILT_IN = [];', 'const BUILT_IN = ' + JSON.stringify(paintings) + ';')
+    .replace('const BUILT_IN_AUCTIONS = [];', 'const BUILT_IN_AUCTIONS = ' + JSON.stringify(auctions) + ';')
+    .replace('const BUILT_IN_REVIEWS = [];', 'const BUILT_IN_REVIEWS = ' + JSON.stringify(reviews) + ';')
+    .replace('const BUILT_IN_POLLS = [];', 'const BUILT_IN_POLLS = ' + JSON.stringify(polls) + ';');
+  const blob = new Blob(['<!DOCTYPE html>\n' + withData], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'kva-art.html';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast("Файл сайта с данными скачан — размещайте его вместо старого ✦");
+});
+document.getElementById('save-backup').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify({paintings, orders, auctions, reviews, polls, chats:pchats, stats}, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'kva-art-backup.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast("Резервная копия скачана.");
+});
+document.getElementById('load-backup').addEventListener('change', e=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = ev=>{
+    try{
+      const data = JSON.parse(ev.target.result);
+      if(!Array.isArray(data.paintings)) throw 0;
+      if(!confirm(`Загрузить данные из копии (${data.paintings.length} работ)? Текущие данные будут заменены.`)) return;
+      paintings = data.paintings;
+      orders = Array.isArray(data.orders) ? data.orders : [];
+      auctions = Array.isArray(data.auctions) ? data.auctions : [];
+      reviews = Array.isArray(data.reviews) ? data.reviews : [];
+      polls = Array.isArray(data.polls) ? data.polls : [];
+      pchats = Array.isArray(data.chats) ? data.chats : [];
+      if(data.stats) stats = data.stats;
+      nextId  = paintings.reduce((m,p)=>Math.max(m,p.id||0),0)+1;
+      nextOrd = orders.reduce((m,o)=>Math.max(m,o.id||0),0)+1;
+      nextAuc = auctions.reduce((m,a)=>Math.max(m,a.id||0),0)+1;
+      nextRev = reviews.reduce((m,x)=>Math.max(m,x.id||0),0)+1;
+      nextPoll= polls.reduce((m,x)=>Math.max(m,x.id||0),0)+1;
+      nextChat= pchats.reduce((m,x)=>Math.max(m,x.id||0),0)+1;
+      saveAll();
+      renderGallery(); renderSold(); renderExpo(); renderAuctions(); renderPolls(); renderReviews(); renderStats();
+      renderAdminList(); renderOrdersAdmin(); renderChatsAdmin(); renderReviewsAdmin(); renderAuctionsAdmin(); renderPollsAdmin();
+      fillAuctionSelect(); fillPollChecks();
+      toast("Данные восстановлены из копии ✓");
+    }catch(err){ toast("Не удалось прочитать файл копии."); }
+  };
+  r.readAsText(f);
+  e.target.value = '';
+});
+
+/* ================= СТАРТ ================= */
+drawFrogsInput();
+renderUserLink();
+renderProfile();
+renderGallery();
+renderSold();
+renderExpo();
+renderAuctions();
+renderPolls();
+renderReviews();
+renderStats();
+renderPersonalChat('contact-personal-chat','Общий вопрос');
+const u0 = currentUser();
+if(u0){
+  document.getElementById('rv-name').value = u0.name;
+  if(!u0.createdAt){ u0.createdAt = nowTime(); saveAll(); }
+}
+</script>
+</body>
+</html>
